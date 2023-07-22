@@ -1,0 +1,31 @@
+<nav search_view="search">
+  <view name="asset_and_identity_searching" default='true' />
+  <view name="adding_sources_to_a__i" />
+  
+ <collection label="Administration">
+    <view name="assets_and_identities_sources" />
+   <view name="debug_asset_data" />
+   
+<divider></divider>
+<a name="edit_a_and_i" href="/app/SplunkEnterpriseSecuritySuite/ess_entity_management">Edit A&amp;I</a>
+  </collection>
+  
+
+ <collection label="Searches">
+    <view name="asset_search" />
+   <view name="identity_search" />
+     </collection>  
+  <collection label="Dashboards And Reports">
+    <view name="asset_visibility_tooling" />
+    <divider></divider>
+  <view name="analytics_workspace" />
+  <view name="datasets" />
+  <view name="reports" />
+  <view name="alerts" />    
+     <view name="dashboards" />
+     </collection>   
+  
+
+
+    <view name="search"  />
+</nav>

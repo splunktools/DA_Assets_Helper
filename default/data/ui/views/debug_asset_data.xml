@@ -1,0 +1,44 @@
+<form version="1.1" theme="dark">
+  <label>Debug Asset Data</label>
+  <description>This is designed to debug issues with the A&amp;I Framework sources. You can enter a hostname, IP, dns, or SID in the asset field and see the current set up in A&amp;I and each feed from each source to identify issues. The source_of_data in the input panel shows which lookup is feeding that row of data.</description>
+  <fieldset submitButton="true">
+    <input type="text" token="tok_asset" searchWhenChanged="true">
+      <label>Asset</label>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Asset Search</title>
+      <table>
+        <search>
+          <query>| `assets`
+| search asset="$tok_asset$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Inputs</title>
+      <table>
+        <search>
+          <query>| rest /services/data/transforms/lookups 
+| search (title="Assets_Identity*") 
+| eval asset="$tok_asset$" 
+| table title asset 
+| map maxsearches=50 search="| inputlookup $$title$$ | search nt_host=\"$tok_asset$\" OR dns=\"$tok_asset$\" OR ip=\"$tok_asset$\" OR sid=\"$tok_asset$\" | eval source_of_data=\"$$title$$\""</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

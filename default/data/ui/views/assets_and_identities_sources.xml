@@ -1,0 +1,46 @@
+<form version="1.1" theme="dark">
+  <label>Assets and Identities Sources</label>
+  <fieldset submitButton="true">
+    <input type="text" token="name" searchWhenChanged="true">
+      <label>Name</label>
+      <default>*</default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Lookups</title>
+      <table>
+        <search>
+          <query>| rest /services/data/transforms/lookups
+| search title="Assets_Identity*" 
+| table title, fields_array, filename
+| search title="$name$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Reports</title>
+      <table>
+        <search>
+          <query>| rest /servicesNS/-/-/saved/searches 
+| search title="Assets_Identity*" 
+| table title, search, disabled,is_scheduled, next_scheduled_time, cron_schedule, dispatch.earliest_time, eai:acl.app, id
+| search title="$name$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

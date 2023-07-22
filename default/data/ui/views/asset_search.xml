@@ -1,0 +1,134 @@
+<form version="1.1" theme="dark">
+  <label>Search for asset details</label>
+  <fieldset submitButton="true">
+    <input type="text" token="asset_tok">
+      <label>Asset</label>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Splunk Installed</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+| eval result=if(security_tooling="splunk","True","False")
+| fields result</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Splunk Data</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+`extract_meta(ep_last_discovered)`
+`extract_meta(sp_last_discovered)`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval ep_status=if(strptime(ep_last_discovered, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-30d@d"),"active","inactive") 
+| eval sp_status=if(strptime(sp_last_discovered, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-30d@d"),"active","inactive") 
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive") 
+| fields sp_data_status</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Splunk Internal Data Status</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+| rex field=short_description "sp_data_last_ingested\:\s(?&lt;sp_data_last_ingested&gt;\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}\:\d{2})" 
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| rex field=short_description "sp_internal_data_last_ingested\:\s(?&lt;sp_internal_data_last_ingested&gt;\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}\:\d{2})" 
+| eval internal_time= strptime(sp_internal_data_last_ingested, "%Y-%m-%d %H:%M:%S")
+| eval sp_data_status=if(strptime(sp_internal_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| fields sp_data_status</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Splunk Last Checked In</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+`extract_meta(sp_last_discovered)`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| fields sp_last_discovered</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Splunk Data Last Ingested</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+`extract_meta(ep_last_discovered)`
+`extract_meta(sp_last_discovered)`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval ep_status=if(strptime(ep_last_discovered, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-30d@d"),"active","inactive") 
+| eval sp_status=if(strptime(sp_last_discovered, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-30d@d"),"active","inactive") 
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive") 
+| fields sp_data_last_ingested</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Splunk Internal Data Last Ingested</title>
+      <single>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"
+| rex field=short_description "sp_data_last_ingested\:\s(?&lt;sp_data_last_ingested&gt;\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}\:\d{2})" 
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| rex field=short_description "sp_internal_data_last_ingested\:\s(?&lt;sp_internal_data_last_ingested&gt;\d{4}\-\d{2}\-\d{2}\s\d{2}\:\d{2}\:\d{2})" 
+| eval sp_data_status=if(strptime(sp_internal_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| fields sp_internal_data_last_ingested</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>| `assets`
+| search asset="$asset_tok$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</form>

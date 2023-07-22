@@ -1,0 +1,124 @@
+<dashboard version="1.1" theme="dark">
+  <label>Splunk Data vs DS</label>
+  <row>
+    <panel>
+      <title>Total Hosts Reporting or Sending Data</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| eval _time= strptime(sp_last_checked_in, "%Y-%m-%d %H:%M:%S")
+| where sp_data_status="active" OR  _time&gt;=relative_time(now(), "-30d@d")
+| stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Hosts Sending Data Last 30 Days</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| search sp_data_status="active"
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Hosts Checking In Last 30 Days</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval _time= strptime(sp_last_checked_in, "%Y-%m-%d %H:%M:%S")
+| where _time&gt;=relative_time(now(), "-30d@d")
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Hosts Not Checking In Last 30 days with Data</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| eval _time= strptime(sp_last_checked_in, "%Y-%m-%d %H:%M:%S")
+| where _time&lt;=relative_time(now(), "-30d@d") OR isnull(_time)
+| search sp_data_status="active"
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Total Hosts Checking In Last 30 Days with No Data</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| eval _time= strptime(sp_last_checked_in, "%Y-%m-%d %H:%M:%S")
+| where _time&gt;=relative_time(now(), "-30d@d")
+| search sp_data_status="inactive"
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[250,500,1000]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Total Hosts Checking In Last 30 Days with No Data - Providing _Internal Data to Splunk</title>
+      <single>
+        <search>
+          <query>| `assets`
+`extract_meta(ep_last_discovered)`
+`extract_meta(sp_last_discovered)`
+`extract_meta(sp_data_last_ingested)`
+`extract_meta(sp_last_checked_in)`
+| eval sp_data_status=if(strptime(sp_data_last_ingested, "%Y-%m-%d %H:%M:%S")&gt;=relative_time(now(), "-1mon@mon"),"active","inactive")
+| eval internal_time= strptime(sp_internal_data_last_ingested, "%Y-%m-%d %H:%M:%S")
+| eval _time= strptime(sp_last_discovered, "%Y-%m-%d %H:%M:%S")
+| where _time&gt;=relative_time(now(), "-30d@d")
+| search sp_data_status="inactive"
+| where internal_time&gt;=relative_time(now(), "-30d@d")
+| stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">129</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+</dashboard>

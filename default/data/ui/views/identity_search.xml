@@ -1,0 +1,25 @@
+<form version="1.1" theme="dark">
+  <label>Identity Search</label>
+  <fieldset submitButton="true">
+    <input type="text" token="identity">
+      <label>Identity</label>
+      <default></default>
+      <prefix>*</prefix>
+      <suffix>*</suffix>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Results</title>
+      <table>
+        <search>
+          <query>| `identities`
+| search identity="$identity$"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</form>

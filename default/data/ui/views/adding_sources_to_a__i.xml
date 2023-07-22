@@ -1,0 +1,81 @@
+<dashboard  version="1.1" theme="light">
+  <label>Adding Sources to A &amp; I</label>
+  <row>
+    <panel>
+      <title>Assets</title>
+      <html>
+        <div style="width:70%;margin:auto;padding-top:50px">
+        <div style="text-align:center">
+        <img src="/static/app/DA_Assets_Helper/A_and_I_Design.png"/>
+        </div>
+        
+          <h1>Best Practices</h1>
+          <div>
+            <h2>Naming conventions to make it easier to identify reports, CSVs, and lookups that ingest into Assets and Identity</h2>
+          </div>
+          <div>
+            Assets_Identities_<span style="font-weight:800">DataSourceName</span>_lookup Report
+                      </div>
+          <div>
+            Assets_Identities_<span style="font-weight:800">DataSourceName</span>_lookup.csv
+                      </div>
+          <div>
+            Assets_Identities_<span style="font-weight:800">DataSourceName</span>_lookup
+          </div>
+          <hr></hr>
+          <div>
+            <h2>Schedule at off hours and stagger them</h2>
+            </div>
+          <pre>Interval = 6 2 * * *</pre>
+          <hr></hr>
+          <div>
+            <h2>Use Macros to standardize data cleanup</h2>
+            <h3>This macro formats the multi-value fields so they can be stored in lookups</h3>
+            </div>
+          <pre>`multivalue_fields_for_lookup`</pre>
+
+          <div>
+            <h3>This macro is design to remove invalid IPs (home IPs) and you can edit this macro to match your needs</h3>
+            </div>
+          <pre>`remove_home_ip`</pre>
+
+          <div>
+            <h3>This macro is designed to deduplicate multivalue fields</h3>
+            </div>
+          <pre>`remove_duplicates`</pre>
+          <hr></hr>
+          <div>
+            <h3>Example of a search adding endpoint data to A&amp;I</h3>
+            </div>
+          <pre>index="endpoint" 
+| rename hostname as nt_host, os AS OS 
+| stats values(domain) as domain, values(OS) as OS, values(ip) as ip, values(mac) as mac latest(_time) as last_checked_in by nt_host 
+| eval security_tooling="endpoint" 
+| eval meta="ep_last_discovered: ".strftime(last_checked_in,"%Y-%m-%d %H:%M:%S")
+    `remove_home_ip` 
+    `remove_ip_based_on_os`
+    `multivalue_fields_for_lookup`
+| outputlookup Assets_Identity_Endpoint_lookup.csv
+</pre>
+
+          <div>
+            <h3>Example of a search looking for Splunk Data</h3>
+            </div>
+          <pre>| tstats latest(_time) as last_data_ingested where `splunk_data_indexes` by host 
+| rex field="host" "(?&lt;nt_host&gt;[a-zA-Z0-9\_\-]+)" 
+| eval nt_host=if(match(host,"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"),null(),nt_host) 
+| rename host as dns  
+| eval security_tooling="splunk" 
+| eval ip=if(match(dns,"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$"),dns,null()) 
+| eval dns=if(isnull(ip),dns,null()) 
+`remove_home_ip`
+| eval meta="sp_data_last_ingested: ".strftime(last_data_ingested,"%Y-%m-%d %H:%M:%S")
+    `multivalue_fields_for_lookup`
+    | outputlookup Assets_Identity_Splunk_Data_OS_lookup.csv
+</pre>
+
+        </div>
+        </html>
+    </panel>
+  </row>
+</dashboard>

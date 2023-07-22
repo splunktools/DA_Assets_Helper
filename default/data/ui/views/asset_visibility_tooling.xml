@@ -1,0 +1,37 @@
+<dashboard  version="1.1" theme="dark">
+  <label>Asset Visibility Tooling</label>
+  <row>
+    <panel>
+      <title>Tooling Distribution</title>
+      <table>
+        <search>
+          <query>|`assets` 
+| eventstats count as total 
+| stats count values(total) as total by security_tooling 
+| eval percent=(round((count/total)*100,2))."%" 
+| eval total=tostring(total, "commas") 
+| eval count=tostring(count, "commas")</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Tooling Distribution</title>
+      <chart>
+        <search>
+          <query>| `assets` 
+| eventstats count as total 
+| stats count values(total) as total by security_tooling</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.overlayFields">total</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>
